@@ -1,4 +1,4 @@
-# otel-collector-k8s
+# otel-collector-K8s
 
 # Is it Observable
 <p align="center"><img src="/image/logo.png" width="40%" alt="Is It observable Logo" /></p>
