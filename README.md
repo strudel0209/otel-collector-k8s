@@ -71,18 +71,16 @@ IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx -ojson | jq -j '.
 ```
 #### 2. Update the manifest files
 
-update the following files to update the ingress definitions (depending on your OS and sed install, you will need to pass a .bak extension) :
-MacOS:
-```
-sed -i .bak "s,IP_TO_REPLACE,$IP," kubernetes-manifests/k8s-manifest.yaml
-sed -i .bak "s,IP_TO_REPLACE,$IP," grafana/ingress.yaml
-```
-Linux:
-```
+update the following files to update the ingress definitions (for Mac, add .bak extension for the modified file) :
 ```
 sed -i "s,IP_TO_REPLACE,$IP," kubernetes-manifests/k8s-manifest.yaml
 sed -i "s,IP_TO_REPLACE,$IP," grafana/ingress.yaml
 ```
+```
+sed -i .bak "s,IP_TO_REPLACE,$IP," kubernetes-manifests/k8s-manifest.yaml
+sed -i .bak "s,IP_TO_REPLACE,$IP," grafana/ingress.yaml
+```
+
 
 ### 5.Deploy OpenTelemetry Operator
 
