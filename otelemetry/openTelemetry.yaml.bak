@@ -20,15 +20,10 @@ spec:
   config: |
     receivers:
       hostmetrics:
-          collection_interval: 1m
+          collection_interval: 30s
           scrapers:
             cpu:
             memory:
-            disk:
-            filesystem:
-            network:
-            paging:
-            processes:
             load:
               cpu_average: true
 
@@ -36,10 +31,8 @@ spec:
         collection_interval: 10s
         node_conditions_to_report: [Ready, MemoryPressure,DiskPressure,NetworkUnavailable]
         allocatable_types_to_report: [cpu, memory,storage]
-
       k8s_events:
         auth_type : serviceAccount
-
       receiver_creator:
          watch_observers: [k8s_observer]
          receivers:
@@ -58,9 +51,6 @@ spec:
                   - pod
                   - volume
                   - container
-        filelog:
-          include: [/var/log/*.log]
-
     processors:
       batch:
         send_batch_max_size: 1000
@@ -83,9 +73,9 @@ spec:
                new_value: db3fb2a8-f959-4637-b7b5-4ed79eca4363
              - action: add_label
                new_label: kubernetes.name
-               new_value: otel-lab
-      resourcedetection/gcp:
-        detectors: [env, gcp]
+               new_value: CLUSTER_NAME_TO_REPLACE
+      resourcedetection/gce:
+        detectors: [env, gce]
         timeout: 2s
         override: true
       k8sattributes:
@@ -169,10 +159,10 @@ spec:
       extensions: [k8s_observer,memory_ballast]
       pipelines:
         logs:
-          receivers: [k8s_events,filelog]
+          receivers: [k8s_events]
           processors: [memory_limiter,k8sattributes,batch]
           exporters: [loki/local,loki/cloud,logging]
         metrics:
           receivers: [k8s_cluster,receiver_creator]
-          processors: [memory_limiter,metricstransform,k8sattributes,resourcedetection/gcp,batch]
+          processors: [memory_limiter,metricstransform,k8sattributes,resourcedetection/gce,batch]
           exporters: [prometheus,otlphttp]
