@@ -21,7 +21,7 @@ This repository showcase the usage of the OpenTelemtry Collector with :
 * Grafana
 
 ## Prerequisite
-The following tools need to be install on your machine :
+The following tools need to be installed on your machine :
 - jq
 - kubectl
 - git
@@ -31,7 +31,8 @@ The following tools need to be install on your machine :
 ## Deployment Steps in GCP
 
 You will first need a Kubernetes cluster with 2 Nodes.
-You can either deploy on Minikube or K3s or follow the instructions to create GKE cluster:
+You can either deploy on Minikube or K3s or follow the instructions to create GKE cluster
+Make sure to create a manual GKE Cluster (autopilot mode will conflict with cert-manager resources deployment)
 ### 1.Create a Google Cloud Platform Project
 ```
 PROJECT_ID="<your-project-id>"
@@ -61,7 +62,7 @@ helm upgrade --install ingress-nginx ingress-nginx \
   --repo https://kubernetes.github.io/ingress-nginx \
   --namespace ingress-nginx --create-namespace
 ```
-#### 1. get the ip adress of the ingress gateway
+#### 1. Get the IP adress of the ingress gateway
 Since we are using Ingress controller to route the traffic , we will need to get the public ip adress of our ingress.
 With the public ip , we would be able to update the deployment of the ingress for :
 * hipstershop
@@ -85,9 +86,9 @@ sed -i .bak "s,IP_TO_REPLACE,$IP," grafana/ingress.yaml
 ### 5.Deploy OpenTelemetry Operator
 
 #### 1. Cert-Manager
-The OpenTelemetry operator requires to deploy the Cert-manager :
+The OpenTelemetry operator requires to deploy the [Cert-manager](https://github.com/cert-manager/cert-manager) :
 ```
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.8.2/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.0/cert-manager.yaml
 ```
 #### 2. OpenTelemetry Operator
 ```
@@ -211,9 +212,9 @@ kubectl apply -f grafana/ingress.yaml
 ```
 kubectl create ns loki
 helm upgrade --install loki grafana/loki --namespace loki
-kubectl wait pod -n loki -l  app=loki --for=condition=Ready --timeout=2m
-LOKI_SERVICE=$(kubectl  get svc -l app=loki  -n loki -o jsonpath="{.items[0].metadata.name}")
-sed -i "s,LOKI_TO_REPLACE,$LOKI_SERVICE," otelemetry/openTelemetry.yaml
+kubectl wait pod -n loki -l app.kubernetes.io/name=loki  --for=condition=Ready --timeout=2m
+LOKI_SERVICE=$(kubectl  get svc -l app.kubernetes.io/name=loki   -n loki -o jsonpath="{.items[0].metadata.name}")
+sed -i .bak "s,LOKI_TO_REPLACE,$LOKI_SERVICE," otelemetry/openTelemetry.yaml
 ```
 
 
@@ -227,8 +228,8 @@ kubectl apply -f otelemetry/rbac.yaml
 ```
 CLUSTERID=$(kubectl get namespace kube-system -o jsonpath='{.metadata.uid}')
 CLUSTERNAME="YOUR OWN NAME"
-sed -i "s,CLUSTER_ID_TO_REPLACE,$CLUSTERID," otelemetry/openTelemetry.yaml
-sed -i "s,CLUSTER_NAME_TO_REPLACE,$CLUSTERNAME," otelemetry/openTelemetry.yaml
+sed -i .bak "s,CLUSTER_ID_TO_REPLACE,$CLUSTERID," otelemetry/openTelemetry.yaml
+sed -i .bak "s,CLUSTER_NAME_TO_REPLACE,$CLUSTERNAME," otelemetry/openTelemetry.yaml
 ```
 #### 3. Deploy the collector pipeline
 ```
